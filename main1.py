@@ -8,7 +8,7 @@ app = FastAPI()
 while True:
     try:
         conn = mysql.connector.connect(host = 'localhost', port = 3306,
-                                    username = 'root', password = 'Sanskar@1234',
+                                    username = 'root', password = 'Uwais313786',
                                     database = 'job_application_system')
         cursor = conn.cursor(dictionary=True)
 
@@ -19,11 +19,14 @@ while True:
         print("Error", error)
         break
 
-class User(BaseModel):
-    name :str
+class Application(BaseModel):
+    name: str
     age: int
     email_id: str
     phone_no: str
+    cgpa: float
+    college: str
+    skill: str
 
 @app.get("/")
 def root():
@@ -36,40 +39,40 @@ def get_user():
     return user
 
 @app.post("/users", status_code= status.HTTP_201_CREATED)
-def create_user(usr : User):
-    cursor.execute("""INSERT INTO applicants(name, age, email_id, phone_no) VALUES(%s,%s,%s,%s)""",(usr.name, usr.age, usr.email_id, usr.phone_no))
-    cursor.execute("SELECT * FROM user ORDER BY id DESC LIMIT 1")
+def create_user(usr : Application):
+    cursor.execute("""INSERT INTO applicants(name, age, email_id, phone_no,cgpa, college, skill) VALUES(%s,%s,%s,%s,%s,%s,%s)""",(usr.name, usr.age, usr.email_id, usr.phone_no,usr.cgpa, usr.college, usr.skill))
+    cursor.execute("SELECT * FROM applicants ORDER BY id DESC LIMIT 1")
     new_user = cursor.fetchone()
     conn.commit()
     return {'data': new_user}
 
 @app.get("/users/{id}")
 def get_user(id:int):
-    cursor.execute("""SELECT * FROM applicant WHERE id = (%s)""", (str(id),))
+    cursor.execute("""SELECT * FROM applicants WHERE id = (%s)""", (str(id),))
     user = cursor.fetchone()
     if not user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail = f"User with id {id} not found")
     return {"User_detail": user}
 
-@app.put("/users/{id}")
-def update_user(id:int, usr:User):
-    cursor.execute("""UPDATE applicants SET name = %s,age= %s, e_ mail= %s, p_word = %s, contact_number = %s WHERE id = %s""",
-                   (usr.name, usr.e_mail, usr.p_word, usr.contact_number,str(id))) 
-    cursor.execute("""SELECT * FROM user WHERE id = %s""", (str(id),))
-    updated_user = cursor.fetchone()
-    conn.commit()
+# @app.put("/users/{id}")
+# def update_user(id:int, usr:Application):
+#     cursor.execute("""UPDATE applicants SET name = %s,age= %s, e_ mail= %s, p_word = %s, contact_number = %s WHERE id = %s""",
+#                    (usr.name, usr.e_mail, usr.p_word, usr.contact_number,str(id))) 
+#     cursor.execute("""SELECT * FROM user WHERE id = %s""", (str(id),))
+#     updated_user = cursor.fetchone()
+#     conn.commit()
 
-    if updated_user == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=f"User with id {id} does not exist")
+#     if updated_user == None:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+#                             detail=f"User with id {id} does not exist")
     
-    return {"data": updated_user}
+#     return {"data": updated_user}
 
 @app.delete("/users/{id}")
 def delete_user(id:int, response: Response):
-    cursor.execute("""SELECT * FROM user WHERE id = %s""", (str(id),))
+    cursor.execute("""SELECT * FROM applicants WHERE id = %s""", (str(id),))
     deleted_user = cursor.fetchone()
-    cursor.execute("""DELETE FROM user WHERE id = %s""", (str(id), ))
+    cursor.execute("""DELETE FROM applicants WHERE id = %s""", (str(id), ))
     conn.commit()
     
     if deleted_user == None:
