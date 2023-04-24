@@ -2,9 +2,30 @@
 from fastapi import FastAPI, Response, status, HTTPException
 from pydantic import BaseModel
 import mysql.connector
+from fastapi import (    Cookie,
+    Depends,
+    FastAPI,
+    Query,
+    WebSocket,
+    WebSocketException,
+    status,
+)
+from fastapi.responses import HTMLResponse
 
 app = FastAPI()
 
+html = """
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Chat</title>
+    </head>
+    <body>
+        <h1>Hello</h1>
+
+    </body>
+</html>
+"""
 while True:
     try:
         conn = mysql.connector.connect(host = 'localhost', port = 3306,
@@ -30,7 +51,14 @@ class Application(BaseModel):
 
 @app.get("/")
 def root():
-    return{"message": "welcome to the app"}
+    return HTMLResponse(html)
+
+# @app.websocket("/ws")
+# async def websocket_endpoint(websocket: WebSocket):
+#     await websocket.accept()
+#     while True:
+#         data = await websocket.receive_text()
+#         await websocket.send_text(f"Message text was: {data}")
 
 @app.get("/users")
 def get_user():
